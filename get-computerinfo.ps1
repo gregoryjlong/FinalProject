@@ -3,7 +3,6 @@
 #Project 1
 
 
-
 #$computername = $env:computername
 #$date = get-date -format "MM-dd-yyyy"
 #filepath = "C:\$computername-$date.txt"
@@ -12,19 +11,16 @@
 #set-strictmode -version 2.0
 Function Get-SystemInformation
 {
-
-Param(
-	[Parameter(ParameterSetName='ComputerName',Position = 0,Mandatory=$true)] [array]$computername = @()
-	)
+$computername = @()
+	
 $date = get-date -format "MM-dd-yyyy"
 $filepath = "C:\$computername-$date.txt"
-$computername
-#exit
 
-#$computername = @()
 foreach ($computer in $computername) {
 
-Write-Verbose "Gregory Long, $date, $computername Information Script" | Out-file -filepath $filepath
+New-PSSession -ComputerName $computer -Credential Domain01\Admin01 -ThrottleLimit 16
+
+Write-Output "Gregory Long, $date, $computername Information Script" | Out-file -filepath $filepath
 
 #Command1. IP Address for a remote system and whether the system uses DHCP
 #Write-Output "#Command1: Operating System Information" | Out-File $filepath -append
