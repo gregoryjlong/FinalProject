@@ -53,7 +53,7 @@ $cmd7 = Get-ciminstance -classname win32_operatingsystem -Computername "$compute
 
 #Outputing an Object
 $syshash = [ordered]@{ MachineName = $computer; RemoteIPAddress = $cmd1.ipaddress; RemoteUsesDHCP = $cmd1.dhcpenabled; RemoteDNSClientServerAddress = $cmd2.ServerAddresses; RemoteOSName = $cmd3.Caption; RemoteOSBuildNumber = $cmd3.BuildNumber; RemoteOSVersion = $cmd3.Version; RemoteMemoryinGB = $cmd4; RemoteProcessorName = $cmd5.name; RemoteFreeSpace = $cmd6; RemoteLastReboot = $cmd7.lastbootuptime } 
-$syshash | Out-File $filepath -Append
+Write-Verbose $syshash | Out-File $filepath -Append
 	}
 catch [error] {
 	Write-Host "$computer unable to get system information  due to the errors in the script."
