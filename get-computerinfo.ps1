@@ -1,14 +1,14 @@
-#Gregory Long
-#Tuesday session
-#Project 1
+<#
+.SYNOPSIS
+    .
+.DESCRIPTION
+    Powershell script to get system information on target machines which are passed as parameter for this script.
+.PARAMETER Computername
+    System hostname or ipaddress
+.PARAMETER LiteralPath
+    Specify one single machine or more than one machine hostname or ipaddress.
+#>
 
-
-#$computername = $env:computername
-#$date = get-date -format "MM-dd-yyyy"
-#filepath = "C:\$computername-$date.txt"
-
-#Write-Output "Gregory Long, $date, $computername Information Script" | Out-file -filepath $filepath
-#set-strictmode -version 2.0
 Function Get-SystemInformation
 {
 $computername = @()
