@@ -2,6 +2,8 @@
 #Tuesday session
 #Project 1
 
+
+
 #$computername = $env:computername
 #$date = get-date -format "MM-dd-yyyy"
 #filepath = "C:\$computername-$date.txt"
@@ -24,50 +26,33 @@ foreach ($computer in $computername) {
 
 Write-Output "Gregory Long, $date, $computername Information Script" | Out-file -filepath $filepath
 
-#Command1. Operating System Information
+#Command1. IP Address for a remote system and whether the system uses DHCP
 Write-Output "#Command1: Operating System Information" | Out-File $filepath -append
-Get-CimInstance Win32_OperatingSystem -ComputerName "$computer" | Format-List -Property Name,Caption,Version | Out-file $filepath -append
+Get-ciminstance win32_networkadapterconfiguration -computername "$computer" | Select-Object ipaddress,dhcpenabled | Out-File $filepath -append
 
-#Command2. Processor information
-Write-Output "#Command2: Processor Information" | Out-File $filepath -Append
-Get-ciminstance win32_processor -computername "$computer" | select-object deviceid,name,maxclockspeed | out-file $filepath -Append
+#Command2. Acquire DNS Client Server address used by remote System
+Write-Output "#Command2: Acquire DNS Client Server address used by remote System" | Out-File $filepath -Append
+Get-dnsclientserveraddress | select -first 1 | Select-Object ServerAddresses | Out-File $filepath -append
 
-#Command3. IP address config
-Write-Output "#Command3: IP address config" | Out-file $filepath -Append
-Get-ciminstance win32_networkadapterconfiguration -computername "$computer" | format-table -property ipaddress,ipsubnet,defaultgateway,dhcpenabled | Out-File $filepath -Append
+#Command3.  Determine Operating System name, build, and version number of Remote System
+Write-Output "#Command3:  Determine Operating System name, build, and version number of Remote System" | Out-file $filepath -Append
+Get-CimInstance Win32_OperatingSystem -ComputerName $computername | Format-List -Property Name,Caption,Version,BuildNumber | Out-File $filepath -append
 
-#Command4. DNS Server address
-Write-Output "#Command4: DNS Server Address" | Out-File $filepath -Append
-Get-dnsclientserveraddress | sort-object serveraddress | out-file $filepath -Append
+#Command4. Determine the amount of system memory in GB.
+Write-Output "#Command4: Determine the amount of system memory in GB." | Out-File $filepath -Append
+Get-ciminstance win32_physicalmemory -computername $computername | measure-object -property capacity -sum | foreach-object {"{0:N2}" -f ([math]::round(($_.sum / 1GB),2))} | out-file $filepath -Append
 
-#Command5. System Memory
-Write-Output "#Command5: System Memory" | Out-File $filepath -Append
-Get-ciminstance win32_physicalmemory -computername "$computer" | measure-object -property capacity -sum | foreach-object {"{0:N2}" -f ([math]::round(($_.sum / 1GB),2))} | out-file $filepath -Append
+#Command5. Processor Name for remote system
+Write-Output "#Command5: Processor Name for remote system" | Out-File $filepath -Append
+Get-ciminstance win32_processor -computername $computername | select-object name | out-file $filepath -Append
 
-#Command6. Free Space
-Write-Output "#Command6: Free Space" | Out-File $filepath -Append
-get-ciminstance -computername "$computer" win32_logicaldisk | select-object name | where-object caption -eq "C:" | foreach-object {write-output " $($_.caption) $('{0:N2}' -f ($_.Size/1gb)) GB total, $('{0:N2}' -f ($_.FreeSpace/1gb)) GB free "} | out-file $filepath -Append
-#get-ciminstance -computername "$computer" win32_logicaldisk | Select-Object FreeSpace | out-file $filepath -Append
+#Command6. Determine the amount of free space (in GB) for c: on the remote system
+Write-Output "#Command6: Determine the amount of free space (in GB) for c: on the remote system" | Out-File $filepath -Append
+get-ciminstance -computername $computername win32_logicaldisk | Measure-Object -property Size -sum | foreach-object {"{0:N2}" -f ([math]::round(($_.sum / 1GB),2))} | out-file $filepath -Append
 
-#Command7. Last Bootup
-Write-Output "#Command7: Last Bootup Date/Time" | Out-File $filepath -Append
-Get-ciminstance -classname win32_operatingsystem -Computername "$computer" | Select-Object name,lastbootuptime | out-file $filepath -Append
-
-#Command8. Last User Login
-Write-Output "#Command8: Last User Login Date/Time" | Out-File $filepath -Append
-Get-localuser | Where-object {$_.Lastlogon -le (get-date).AddDays(-30)} | select-object name,lastlogon | out-file $filepath -append
-
-#Command9. Retireve All User Accounts
-Write-Output "#Command9: Retrieve All User Accounts" | Out-File $filepath -Append
-Get-ciminstance win32_useraccount -computername "$computer" | select-object name | out-file $filepath -Append
-
-#Command10. Determine Installed Hotfixes And Updates
-Write-Output "#Command10: Installed Hotfixes And Updates" | Out-File $filepath -Append
-get-hotfix -computername "$computer" | select-object hotfixid | out-file $filepath -Append
-
-#Command11. All Installed Applications
-Write-Output "#Command11: All Installed Applications" | Out-File $filepath -Append
-get-ciminstance -class win32_service -computername "$computer" | select-object name,caption,version | out-file $filepath -append
+#Command7. Determine the Last Reboot performed by a remote system
+Write-Output "#Command7: Determine the Last Reboot performed by a remote system" | Out-File $filepath -Append
+Get-ciminstance -classname win32_operatingsystem -Computername $computername | Select-Object lastbootuptime | Out-File $filepath -Append
 	
 	}
 }
